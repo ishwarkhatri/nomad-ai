@@ -16,6 +16,10 @@
 
 import asyncio
 import os
+import sys
+
+# Add the project root to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from absl import app, flags
 from dotenv import load_dotenv
@@ -68,6 +72,7 @@ def create(env_vars: dict[str, str]) -> None:
             "absl-py (>=2.2.1,<3.0.0)",
             "pydantic (>=2.10.6,<3.0.0)",
             "requests (>=2.32.3,<3.0.0)",
+            "deprecated",
         ],
         extra_packages=[
             "./nomad_ai",  # The main package
