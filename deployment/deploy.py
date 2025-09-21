@@ -65,8 +65,8 @@ def create(env_vars: dict[str, str]) -> None:
         display_name="Nomad-AI-ADK",
         description="An AgentEngine Deployment For Nomad AI",                    
         requirements=[
-            "google-adk (==1.0.0)",
-            "google-cloud-aiplatform[agent_engines] (==1.93.1)",
+            "google-adk (==0.5.0)",
+            "google-cloud-aiplatform[agent_engines] (==1.94.0)",
             "google-genai (==1.16.1)",
             "pydantic (>=2.10.6,<3.0.0)",
             "absl-py (>=2.2.1,<3.0.0)",
@@ -153,12 +153,16 @@ def main(argv: list[str]) -> None:
     elif not map_key:
         print("Missing required environment variable: GOOGLE_PLACES_API_KEY")
         return
+    
+    print("akash")
 
     vertexai.init(
         project=project_id,
         location=location,
         staging_bucket=f"gs://{bucket}",
     )
+
+
 
     if FLAGS.create:
         create(env_vars)
