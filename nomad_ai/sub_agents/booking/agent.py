@@ -14,11 +14,23 @@
 
 """Booking agent and sub-agents, handling the confirmation and payment of bookable events."""
 
+import os
 from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
 from google.genai.types import GenerateContentConfig
 
 from nomad_ai.sub_agents.booking import prompt
+
+from toolbox_core import ToolboxSyncClient
+
+# Get MCP Toolbox endpoint from environment
+MCP_TOOLBOX_URL = os.getenv(
+    "MCP_TOOLBOX_URL",
+    "https://toolbox-632735824953.us-central1.run.app"
+)
+
+# Initialize Toolbox client
+toolbox = ToolboxSyncClient(MCP_TOOLBOX_URL)
 
 
 create_reservation = Agent(

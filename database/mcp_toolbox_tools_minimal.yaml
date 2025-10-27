@@ -1,0 +1,91 @@
+# Minimal MCP Toolbox Configuration for Nomad-AI
+# 
+# This is a simplified version with just the essential operations
+# Use this if you want to start with basic functionality
+
+# Define your Cloud SQL connection
+sources:
+  nomad-ai-cloud-sql:
+    kind: cloud-sql-postgres
+    project: the-ragtag-crew-hackathon
+    region: us-central1
+    instance: nomad-ai-db-instance
+    database: postgres
+    user: postgres
+    password: "postgres"  # TODO: Move to Secret Manager for production
+
+# Define the database tools available to your agents
+tools:
+  # Essential Tool 1: Save itinerary after booking
+  save-itinerary-to-database:
+    kind: postgres-sql
+    source: nomad-ai-cloud-sql
+    description: Save a completed travel itinerary to the database after booking confirmation. Returns itinerary_id on success.
+    parameters:
+      - name: user_id
+        type: string
+        description: Unique identifier for the user/traveler
+      - name: trip_name
+        type: string
+        description: Name or title of the trip (e.g., "Seattle Weekend Getaway")
+      - name: origin
+        type: string
+        description: Starting location/city
+      - name: destination
+        type: string
+        description: Destination location/city
+      - name: start_date
+        type: string
+        description: Trip start date in YYYY-MM-DD format
+      - name: end_date
+        type: string
+        description: Trip end date in YYYY-MM-DD format
+      - name: itinerary_data
+        type: string
+        description: Complete itinerary as JSON string
+      - name: booking_status
+        type: string
+        description: Booking status (pending, booked, cancelled, completed). Defaults to 'booked'.
+        default: "booked"
+    statement: |
+      SELECT itinerary_id, success, message 
+      FROM save_itinerary($1, $2, $3, $4, $5::date, $6::date, $7::jsonb, COALESCE($8, 'booked'));
+
+  # Essential Tool 2: Get user itineraries
+  get-user-itineraries:
+    kind: postgres-sql
+    source: nomad-ai-cloud-sql
+    description: Retrieve all itineraries for a specific user. Returns list of itinerary summaries.
+    parameters:
+      - name: user_id
+        type: string
+        description: Unique identifier for the user/traveler
+      - name: limit
+        type: integer
+        description: Maximum number of itineraries to return. Defaults to 10.
+        default: 10
+    statement: |
+      SELECT itinerary_id, trip_name, origin, destination, 
+             start_date, end_date, booking_status, created_at, total_cost_usd
+      FROM get_user_itineraries($1, COALESCE($2, 10));
+
+  # Essential Tool 3: Get itinerary details
+  get-itinerary-details:
+    kind: postgres-sql
+    source: nomad-ai-cloud-sql
+    description: Retrieve complete details of a specific itinerary including the full JSON data.
+    parameters:
+      - name: itinerary_id
+        type: integer
+        description: The unique ID of the itinerary to retrieve
+    statement: |
+      SELECT itinerary_id, user_id, trip_name, origin, destination,
+             start_date, end_date, itinerary_data, booking_status, created_at
+      FROM get_itinerary_details($1);
+
+# Group tools into a toolset for easy management
+toolsets:
+  nomad-ai-database-tools:
+    - save-itinerary-to-database
+    - get-user-itineraries
+    - get-itinerary-details

@@ -23,6 +23,7 @@ pydantic = "^2.10.6"
 python-dotenv = "^1.0.1"
 google-genai = "^1.16.1"
 google-adk = "^1.0.0"
+toolbox-core = "^1.0.0"  # For MCP Toolbox integration
 
 [tool.poetry.group.dev]
 optional = true
