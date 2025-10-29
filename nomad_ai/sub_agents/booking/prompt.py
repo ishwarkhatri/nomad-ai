@@ -65,40 +65,36 @@ Other trip details:
   <hotel_selection>{hotel_selection}</hotel_selection>
   <room_selection>{room_selection}</room_selection>
 
-Remember that you can only use the tools `create_reservation`, `payment_choice`, `process_payment`.
+  Remember that you can only use the tools `create_reservation`, `payment_choice`, `process_payment`.
 
-After all bookings are successfully completed and payments processed:
+  After all bookings are successfully completed and payments processed:
+  1. Call the MCP tool `save-itinerary-to-database` (not print or simulate).
+    - The tool name must be exactly `"save-itinerary-to-database"`.
+    - The parameters must be sent as a JSON object.
 
-1. Use the 'save-itinerary-to-database' tool (from MCP Toolbox) to persist the itinerary.
-2. Extract the following from session state:
-   - user_id: Current user's ID
-   - trip_name: From itinerary.trip_name
-   - origin: From session state 'origin'
-   - destination: From session state 'destination'
-   - start_date: From session state 'start_date' (YYYY-MM-DD format)
-   - end_date: From session state 'end_date' (YYYY-MM-DD format)
-   - itinerary_data: Complete itinerary JSON object as a string (use json.dumps if needed)
-   - booking_status: 'booked'
+  2. The parameters are:
+  {
+    "user_id": "<user_id>",
+    "trip_name": "<trip_name>",
+    "origin": "<origin>",
+    "destination": "<destination>",
+    "start_date": "<start_date>",
+    "end_date": "<end_date>",
+    "itinerary_data": "<itinerary_data as a JSON string>",
+    "booking_status": "booked"
+  }
 
-3. Call the tool with these parameters. Example:
-   save-itinerary-to-database(
-     user_id="traveler_001",
-     trip_name="Seattle Weekend Getaway",
-     origin="San Diego",
-     destination="Seattle",
-     start_date="2025-06-15",
-     end_date="2025-06-17",
-     itinerary_data='{"trip_name":"Seattle Weekend Getaway","days":[...]}',
-     booking_status="booked"
-   )
+  3. Do NOT print Python function calls like `print(default_api.save-itinerary-to-database(...))`.
+    Instead, output a proper JSON tool invocation that MCP can execute.
 
-4. The tool will return itinerary_id, success, and message. Share this with the user:
-   "Your trip has been successfully booked and saved to our system! 
-    Your itinerary ID is {itinerary_id}. You can use this ID to retrieve 
-    your trip details anytime by saying 'show me itinerary {itinerary_id}'."
+  4. After calling the tool, capture its response (it contains `success`, `itinerary_id`, and `message`).
+    - If success is true, inform the user:
+      “Your trip has been successfully booked and saved. Your itinerary ID is itinerary_id. You can use this ID to retrieve your trip anytime.”
 
-Important: Only save to database after ALL bookings are confirmed and paid for.
-"""
+    - If success is false, show the returned message and suggest retrying the save operation.
+
+  Important: Only save to database after ALL bookings are confirmed and paid for.
+  """
 
 
 CONFIRM_RESERVATION_INSTR = """
