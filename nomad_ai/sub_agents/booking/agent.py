@@ -31,6 +31,8 @@ MCP_TOOLBOX_URL = os.getenv(
 
 # Initialize Toolbox client
 toolbox = ToolboxSyncClient(MCP_TOOLBOX_URL)
+tools = toolbox.load_toolset('nomad-ai-database-tools')
+
 
 
 create_reservation = Agent(
@@ -55,7 +57,6 @@ process_payment = Agent(
     instruction=prompt.PROCESS_PAYMENT_INSTR,
 )
 
-
 booking_agent = Agent(
     model="gemini-2.5-flash",
     name="booking_agent",
@@ -65,6 +66,9 @@ booking_agent = Agent(
         AgentTool(agent=create_reservation),
         AgentTool(agent=payment_choice),
         AgentTool(agent=process_payment),
+        tools[0],
+        tools[1],
+        tools[2]
     ],
     generate_content_config=GenerateContentConfig(
         temperature=0.0, top_p=0.5
