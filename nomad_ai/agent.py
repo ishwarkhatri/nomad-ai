@@ -8,6 +8,8 @@ from nomad_ai.sub_agents.inspiration.agent import inspiration_agent
 from nomad_ai.sub_agents.pre_trip.agent import pre_trip_agent
 from nomad_ai.sub_agents.planning.agent import planning_agent
 from nomad_ai.sub_agents.booking.agent import booking_agent
+from nomad_ai.sub_agents.in_trip.agent import in_trip_agent
+from nomad_ai.sub_agents.post_trip.agent import post_trip_agent
 
 from nomad_ai.tools.memory import _load_precreated_itinerary
 
@@ -22,6 +24,8 @@ root_agent = Agent(
         planning_agent,
         booking_agent,
         pre_trip_agent,
+        in_trip_agent,
+        post_trip_agent,
     ],
     before_agent_callback=_load_precreated_itinerary,
 )
