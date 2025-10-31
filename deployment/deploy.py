@@ -70,8 +70,8 @@ def create(env_vars: dict[str, str]) -> None:
             "google-genai (==1.16.1)",
             "pydantic (>=2.10.6,<3.0.0)",
             "absl-py (>=2.2.1,<3.0.0)",
-            "pydantic (>=2.10.6,<3.0.0)",
             "requests (>=2.32.3,<3.0.0)",
+            "toolbox-core (>=0.5.2,<1.0.0)",
             "deprecated",
         ],
         extra_packages=[
@@ -126,8 +126,8 @@ def main(argv: list[str]) -> None:
     )
     env_vars["SAMPLE_ITINERARY_SCENARIO"] = initial_states_path
     map_key = (
-        FLAGS.initial_states_path
-        if FLAGS.initial_states_path
+        FLAGS.map_key
+        if FLAGS.map_key
         else os.getenv("GOOGLE_PLACES_API_KEY")
     )
     env_vars["GOOGLE_PLACES_API_KEY"] = map_key
