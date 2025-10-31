@@ -83,9 +83,62 @@ tools:
              start_date, end_date, itinerary_data, booking_status, created_at
       FROM get_itinerary_details($1);
 
+  # Essential Tool 4: Save bookings
+  save-booking:
+    kind: postgres-sql
+    source: nomad-ai-cloud-sql
+    description: Save individual booking records (flight, hotel, activity, etc.) linked to an itinerary. Returns booking_id on success.
+    parameters:
+      - name: booking_id
+        type: string
+        description: Unique identifier for the booking
+      - name: itinerary_id
+        type: integer
+        description: The ID of the related itinerary
+      - name: booking_reference
+        type: string
+        description: External booking reference number or vendor ID
+      - name: booking_type
+        type: string
+        description: Type of booking (e.g., "flight", "hotel", "car_rental", "activity")
+      - name: booking_details
+        type: string
+        description: Complete booking details as a JSON string
+      - name: payment_status
+        type: string
+        description: Payment status (pending, paid, refunded, failed)
+      - name: payment_method
+        type: string
+        description: Payment method used (credit_card, debit_card, wallet, etc.)
+      - name: amount_usd
+        type: string
+        description: Total booking amount in USD
+      - name: confirmation_number
+        type: string
+        description: Confirmation or PNR number returned by provider
+      - name: created_at
+        type: string
+        description: Timestamp when the booking was created (ISO 8601 format)
+    statement: |
+      SELECT booking_id, success, message
+      FROM save_booking(
+        $1,            -- booking_id
+        $2,            -- itinerary_id
+        $3,            -- booking_reference
+        $4,            -- booking_type
+        $5::jsonb,     -- booking_details
+        $6,            -- payment_status
+        $7,            -- payment_method
+        $8::numeric,   -- amount_usd
+        $9,            -- confirmation_number
+        $10::timestamptz  -- created_at
+      );
+
+
 # Group tools into a toolset for easy management
 toolsets:
   nomad-ai-database-tools:
     - save-itinerary-to-database
     - get-user-itineraries
     - get-itinerary-details
+    - save-booking

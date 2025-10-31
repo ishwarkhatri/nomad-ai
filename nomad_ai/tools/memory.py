@@ -117,7 +117,16 @@ def _load_precreated_itinerary(callback_context: CallbackContext):
 
     Args:
         callback_context: The callback context.
-    """    
+    """
+    # Sample code for fetching session id from CallbackContext
+    inv_context = callback_context._invocation_context
+    session_obj = inv_context.session
+    session_id = session_obj.id
+    user_id = session_obj.user_id
+
+    #print(f"Session ID: {session_id}")
+    #print(f"User ID: {user_id}")
+    
     data = {}
     with open(SAMPLE_SCENARIO_PATH, "r") as file:
         data = json.load(file)

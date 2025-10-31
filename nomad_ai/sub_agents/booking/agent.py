@@ -19,6 +19,7 @@ from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
 from google.genai.types import GenerateContentConfig
 
+from nomad_ai.shared_libraries import types
 from nomad_ai.sub_agents.booking import prompt
 
 from toolbox_core import ToolboxSyncClient
@@ -57,6 +58,18 @@ process_payment = Agent(
     instruction=prompt.PROCESS_PAYMENT_INSTR,
 )
 
+save_itinerary_agent = Agent(
+    model="gemini-2.5-flash",
+    name="save_itinerary_agent",
+    description="""Validates and structures the itinerary data in the correct Pydantic format before saving to database.""",
+    instruction=prompt.SAVE_ITINERARY_INSTR,
+    disallow_transfer_to_parent=True,
+    disallow_transfer_to_peers=True,
+    output_schema=types.Itinerary,
+    output_key="itinerary",
+    generate_content_config=types.json_response_config,
+)
+
 booking_agent = Agent(
     model="gemini-2.5-flash",
     name="booking_agent",
@@ -66,9 +79,11 @@ booking_agent = Agent(
         AgentTool(agent=create_reservation),
         AgentTool(agent=payment_choice),
         AgentTool(agent=process_payment),
+        AgentTool(agent=save_itinerary_agent),
         tools[0],
         tools[1],
-        tools[2]
+        tools[2],
+        tools[3]
     ],
     generate_content_config=GenerateContentConfig(
         temperature=0.0, top_p=0.5

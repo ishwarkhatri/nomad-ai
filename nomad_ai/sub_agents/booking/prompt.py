@@ -65,31 +65,33 @@ Other trip details:
   <hotel_selection>{hotel_selection}</hotel_selection>
   <room_selection>{room_selection}</room_selection>
 
-  Remember that you can only use the tools `create_reservation`, `payment_choice`, `process_payment`.
+  Remember that you have access to: `create_reservation`, `payment_choice`, `process_payment`, and `save_itinerary_agent`.
 
   After all bookings are successfully completed and payments processed:
-  1. Call the MCP tool `save-itinerary-to-database` (not print or simulate).
-    - The tool name must be exactly `"save-itinerary-to-database"`.
-    - The parameters must be sent as a JSON object.
+  1. First, call the `save_itinerary_agent` tool to validate and structure the itinerary data.
+    - This agent will ensure the itinerary conforms to the Pydantic Itinerary schema.
+    - It will return a properly structured itinerary JSON object.
 
-  2. The parameters are:
-  {
-    "user_id": "<user_id>",
-    "trip_name": "<trip_name>",
-    "origin": "<origin>",
-    "destination": "<destination>",
-    "start_date": "<start_date>",
-    "end_date": "<end_date>",
-    "itinerary_data": "<itinerary_data as a JSON string>",
-    "booking_status": "booked"
-  }
+  2. Once you receive the validated itinerary from `save_itinerary_agent`, call the MCP tool `save-itinerary-to-database`.
+    - The tool name must be exactly `"save-itinerary-to-database"`.
+    - The parameters must be sent as a JSON object:
+    {
+      "user_id": "<user_id>",
+      "trip_name": "<trip_name from validated itinerary>",
+      "origin": "<origin from validated itinerary>",
+      "destination": "<destination from validated itinerary>",
+      "start_date": "<start_date from validated itinerary>",
+      "end_date": "<end_date from validated itinerary>",
+      "itinerary_data": <validated_itinerary_json>,
+      "booking_status": "booked"
+    }
 
   3. Do NOT print Python function calls like `print(default_api.save-itinerary-to-database(...))`.
     Instead, output a proper JSON tool invocation that MCP can execute.
 
   4. After calling the tool, capture its response (it contains `success`, `itinerary_id`, and `message`).
     - If success is true, inform the user:
-      “Your trip has been successfully booked and saved. Your itinerary ID is itinerary_id. You can use this ID to retrieve your trip anytime.”
+      "Your trip has been successfully booked and saved. Your itinerary ID is itinerary_id. You can use this ID to retrieve your trip anytime."
 
     - If success is false, show the returned message and suggest retrying the save operation.
 
@@ -121,4 +123,37 @@ Current time: {_time}
 
 PAYMENT_CHOICE_INSTR = """
   Provide the users with three choice 1. Apple Pay 2. Google Pay, 3. Credit Card on file, wait for the users to make the choice. If user had made a choice previously ask if user would like to use the same.
+"""
+
+
+SAVE_ITINERARY_INSTR = """
+You are responsible for validating and structuring the itinerary data in the correct Pydantic format (types.Itinerary) before it gets saved to the database.
+
+Your task:
+1. Review the itinerary data provided in context
+2. Ensure it conforms to the Itinerary schema with:
+   - trip_name: A simple one-liner describing the trip
+   - start_date: In YYYY-MM-DD format
+   - end_date: In YYYY-MM-DD format
+   - origin: Trip origin city
+   - destination: Trip destination city
+   - days: List of ItineraryDay objects, each containing:
+     - day_number: Integer representing the day
+     - date: In YYYY-MM-DD format
+     - events: List of FlightEvent, HotelEvent, or AttractionEvent objects
+
+3. Return the validated, structured itinerary in the exact Pydantic format
+
+Current time: {_time}
+
+Itinerary to validate and structure:
+<itinerary>
+{itinerary}
+</itinerary>
+
+Trip details:
+<origin>{origin}</origin>
+<destination>{destination}</destination>
+<start_date>{start_date}</start_date>
+<end_date>{end_date}</end_date>
 """
