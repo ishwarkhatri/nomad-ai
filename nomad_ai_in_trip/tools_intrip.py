@@ -19,7 +19,7 @@ from typing import Dict, Any
 
 from google.adk.agents.readonly_context import ReadonlyContext
 
-from nomad_ai_in_trip.sub_agents.in_trip import prompt
+from nomad_ai_in_trip import prompt
 from nomad_ai_in_trip.shared_libraries import constants
 
 
